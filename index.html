@@ -70,7 +70,9 @@
     }
     header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
     header a:hover { color: var(--accent); }
-    .logo { font-weight: 700; font-size: 1.1rem; margin-left: 0; }
+    .logo { margin-left: 0; display: inline-flex; }
+    .logo img { display: block; transition: transform 0.25s; }
+    .logo:hover img { transform: rotate(8deg) scale(1.08); }
     .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
     .sol a { margin-left: 0; }
     .tema-anahtari {
@@ -256,7 +258,7 @@
 </head>
 <body>
   <header>
-    <a href="#" class="logo">IBAN Kontrolü</a>
+    <a href="#" class="logo"><img src="logo.png" alt="IBAN Kontrolü" width="56" height="56"></a>
     <nav class="sol">
       <a href="#nasil">Nasıl çalışır?</a>
       <label class="tema-anahtari" title="Karanlık modu aç/kapat">
