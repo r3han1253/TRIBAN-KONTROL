@@ -354,3 +354,18 @@ a.btn-kopya {
 .toplu-tablo .ok { color: var(--ok); font-weight: 600; }
 .toplu-tablo .err { color: var(--err); font-weight: 600; }
 .toplu-tablo td.aciklama { color: var(--muted); white-space: normal; min-width: 180px; }
+
+/* Tema düğmesi: yalnızca emoji, tıklayınca mod değişir */
+.tema-simge {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.35rem;
+  line-height: 1;
+  transition: background 0.2s, transform 0.2s;
+}
+.tema-anahtari:hover .tema-simge { background: var(--border); }
+.tema-anahtari:active .tema-simge { transform: scale(0.9); }
+.tema-anahtari input:focus-visible + .tema-simge { outline: 2px solid var(--accent); outline-offset: 2px; }
