@@ -531,3 +531,9 @@ document.getElementById("csv-indir").addEventListener("click", () => {
 });
 
 document.getElementById("yil").textContent = new Date().getFullYear();
+
+// Logoya tıklayınca sayfayı baştan yükle (sonuçlar, sekme ve #adres sıfırlanır)
+document.getElementById("logo-baglanti").addEventListener("click", e => {
+  e.preventDefault();
+  location.href = location.pathname + location.search;
+});
