@@ -37,7 +37,7 @@
   --err-bg: #3a1616;
 }
 @media (max-width: 600px) {
-  header, main { padding-left: 1rem; padding-right: 1rem; }
+  header, main { padding-left: 1rem !important; padding-right: 1rem !important; }
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -56,7 +56,16 @@ header {
 }
 header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
 header a:hover { color: var(--accent); }
-.logo { margin-left: 0; display: inline-flex; }
+header {
+  max-width: none;
+  background: #000;
+  padding-left: max(1.5rem, calc((100% - 760px) / 2 + 1.5rem));
+  padding-right: max(1.5rem, calc((100% - 760px) / 2 + 1.5rem));
+}
+header a, header .tema-anahtari { color: #fff; }
+header a:hover { color: #bbb; }
+.logo { margin-left: 0; display: inline-flex; align-items: center; gap: 0.6rem; }
+.site-adi { font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em; color: #fff; }
 .logo img { display: block; width: 44px; height: 44px; transition: opacity 0.2s; }
 .logo:hover img { opacity: 0.85; }
 .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
