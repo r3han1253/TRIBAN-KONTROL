@@ -179,10 +179,28 @@
         </details>
       </div>
     </section>
+
+    <section id="bilgilendirme" class="bilgi-kutu" aria-labelledby="bilgi-baslik">
+      <h2 id="bilgi-baslik">⚠️ Önemli bilgilendirme</h2>
+      <ul>
+        <li><strong>Bu araç alıcının kim olduğunu bilemez.</strong> IBAN'ın içinde hesap sahibinin adı yer almaz. "Geçerli" sonucu, IBAN'ın yalnızca doğru biçimde yazıldığını ve kontrol hanelerinin tuttuğunu gösterir.</li>
+        <li><strong>Hesabın var olduğunu veya açık olduğunu göstermez.</strong> Geçerli bir IBAN; kapatılmış, hiç açılmamış ya da başka birine ait bir hesaba ait olabilir.</li>
+        <li><strong>Para göndermeden önce alıcıyı doğrulayın.</strong> Bankanızın para transferi ekranında görünen alıcı adını kontrol edin. Size IBAN'ı ileten kişiyi, mümkünse telefonla ya da yüz yüze teyit edin.</li>
+        <li><strong>Dolandırıcılığa dikkat.</strong> "IBAN'ım geçerli çıktı, güvenle gönderebilirsin" gibi ifadelere güvenmeyin. Bu araç bir IBAN'ın güvenilir olduğunu söylemez.</li>
+        <li><strong>Banka bilgisi</strong>, IBAN'daki banka koduna ve TCMB'nin ödeme sistemleri katılımcı listesine göre gösterilir. Şube bilgisi IBAN'dan güvenilir şekilde çıkarılamaz.</li>
+        <li>Bu site hiçbir banka veya kamu kurumuyla bağlantılı değildir. Banka adları ve logoları sahiplerine aittir ve yalnızca bankayı tanıtmak için gösterilir.</li>
+        <li>Sonuçlar bilgilendirme amaçlıdır. Sonuçlara dayanarak yapılan işlemlerden doğabilecek zararlardan site sorumlu tutulamaz.</li>
+      </ul>
+    </section>
   </main>
 
   <footer>
-    &copy; <span id="yil"></span> IBAN Doğrula
+    <nav class="alt-baglantilar" aria-label="Yasal bilgiler">
+      <a href="kvkk.html">KVKK Aydınlatma Metni</a>
+      <span aria-hidden="true">·</span>
+      <a href="kvkk.html#cerezler">Gizlilik ve Çerezler</a>
+    </nav>
+    <p>&copy; <span id="yil"></span> IBAN Doğrula · IBAN'ınız hiçbir yere gönderilmez.</p>
   </footer>
 
   <script src="app.js"></script>

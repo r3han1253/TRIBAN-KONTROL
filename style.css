@@ -369,3 +369,56 @@ a.btn-kopya {
 .tema-anahtari:hover .tema-simge { background: var(--border); }
 .tema-anahtari:active .tema-simge { transform: scale(0.9); }
 .tema-anahtari input:focus-visible + .tema-simge { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Önemli bilgilendirme kutusu */
+.bilgi-kutu {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--card);
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.bilgi-kutu h2 { font-size: 1.15rem; }
+.bilgi-kutu ul { margin-left: 1.2rem; display: grid; gap: 0.5rem; }
+.bilgi-kutu li { color: var(--muted); font-size: 0.95rem; }
+.bilgi-kutu strong { color: var(--text); }
+
+/* Alt bilgi bağlantıları */
+.alt-baglantilar {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+footer a { color: var(--muted); }
+footer a:hover { color: var(--accent); }
+
+/* Yasal metin sayfası */
+.yasal { padding: 1rem 0 2rem; }
+.yasal h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+.yasal .tarih { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.yasal h2 { font-size: 1.15rem; margin: 1.75rem 0 0.5rem; }
+.yasal p, .yasal li { color: var(--muted); margin-bottom: 0.5rem; }
+.yasal strong { color: var(--text); }
+.yasal ul, .yasal ol { margin-left: 1.3rem; }
+.yasal table { margin: 0.5rem 0 1rem; font-size: 0.92rem; }
+.yasal th, .yasal td {
+  text-align: left;
+  padding: 0.5rem 0.6rem 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+}
+.yasal td:first-child { width: 28%; color: var(--text); }
+.yasal th { color: var(--text); }
+.yasal .doldur {
+  background: #fef08a;
+  color: #713f12;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.geri { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; }
+.geri:hover { text-decoration: underline; }
