@@ -3,7 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBAN Doğrula</title>
+  <title>IBAN Doğrula – IBAN Geçerli mi, Hangi Bankanın?</title>
+  <meta name="description" content="Türkiye IBAN numarasının geçerli olup olmadığını mod 97 ile anında kontrol edin ve hangi bankaya ait olduğunu öğrenin. Ücretsiz; IBAN hiçbir yere gönderilmez.">
+  <link rel="canonical" href="https://r3han1253.github.io/TRIBAN-KONTROL/">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- Paylaşım önizlemesi (WhatsApp, X, Facebook vb.) -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="IBAN Doğrula">
+  <meta property="og:title" content="IBAN Doğrula – IBAN Geçerli mi, Hangi Bankanın?">
+  <meta property="og:description" content="Türkiye IBAN numarasını anında doğrulayın ve bankasını öğrenin. IBAN hiçbir yere gönderilmez.">
+  <meta property="og:url" content="https://r3han1253.github.io/TRIBAN-KONTROL/">
+  <meta property="og:image" content="https://r3han1253.github.io/TRIBAN-KONTROL/logo.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary">
+
+  <!-- Google için sık sorulan sorular verisi -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "IBAN kaç haneli olur?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Türkiye IBAN'ı TR ile başlar ve toplam 26 karakterdir: TR, 2 haneli kontrol numarası, 5 haneli banka kodu, 1 haneli rezerv alanı ve 16 haneli hesap numarası."}},
+      {"@type": "Question", "name": "IBAN'dan hesap sahibinin adı öğrenilebilir mi?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Hayır. IBAN yalnızca banka kodunu ve hesap numarasını içerir; hesap sahibinin adı IBAN'ın içinde yer almaz."}},
+      {"@type": "Question", "name": "Geçerli çıkan bir IBAN'a güvenle para gönderebilir miyim?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Geçerli sonucu yalnızca IBAN'ın doğru yazıldığını gösterir. Hesabın gerçekten var olduğunu veya kime ait olduğunu göstermez. Para göndermeden önce alıcıyı mutlaka başka bir yoldan doğrulayın."}},
+      {"@type": "Question", "name": "IBAN'dan hangi bankaya ait olduğu nasıl anlaşılır?",
+       "acceptedAnswer": {"@type": "Answer", "text": "IBAN'ın 5. ile 9. haneleri arasındaki 5 haneli sayı banka kodudur. Bu kod, TCMB'nin ödeme sistemleri katılımcı listesindeki banka koduna karşılık gelir."}},
+      {"@type": "Question", "name": "IBAN'dan şube kodu öğrenilebilir mi?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Türkiye IBAN'ında şube kodu için standart bir alan yoktur. Hesap numarasının yapısı bankadan bankaya değişir, bu yüzden şube kodu güvenilir şekilde çıkarılamaz."}},
+      {"@type": "Question", "name": "Girdiğim IBAN kaydediliyor mu?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Hayır. Kontrol tamamen tarayıcınızda yapılır; IBAN hiçbir sunucuya gönderilmez ve kaydedilmez."}}
+    ]
+  }
+  </script>
   <script>
     // Kayıtlı tema tercihini sayfa çizilmeden uygula
     try {
@@ -128,6 +167,8 @@
     summary::after { content: "▾"; color: var(--muted); transition: transform 0.2s; }
     details[open] summary::after { transform: rotate(180deg); }
     .detay-icerik { padding: 0 1.25rem 1.25rem; }
+    .sss-liste { display: grid; gap: 0.6rem; }
+    .sss-liste summary { font-size: 1rem; }
 
     .kopyala { display: none; margin-top: 1.25rem; }
     .kopyala h3 { font-size: 1rem; margin-bottom: 0.5rem; }
@@ -279,11 +320,12 @@
       <form id="iban-formu" autocomplete="off">
         <label for="iban">IBAN numarası</label>
         <div class="row">
-          <input id="iban" type="text" inputmode="text" maxlength="40"
+          <input id="iban" type="text" inputmode="numeric" maxlength="40"
+                 autocomplete="off" spellcheck="false" autocapitalize="characters"
                  placeholder="TR00 0000 0000 0000 0000 0000 00" required>
           <button type="submit" class="btn">Kontrol Et</button>
         </div>
-        <p class="hint">Kontrol tamamen tarayıcınızda yapılır; IBAN hiçbir yere gönderilmez.</p>
+        <p class="hint">IBAN'ı yapıştırın ya da yazın; 26 karakter tamamlanınca sonuç otomatik çıkar. Kontrol tamamen tarayıcınızda yapılır, IBAN hiçbir yere gönderilmez.</p>
       </form>
 
       <div id="sonuc" aria-live="polite">
@@ -321,6 +363,36 @@
       </div>
       </details>
     </section>
+
+    <section id="sss">
+      <h2>Sık sorulan sorular</h2>
+      <div class="sss-liste">
+        <details>
+          <summary>IBAN kaç haneli olur?</summary>
+          <div class="detay-icerik"><p>Türkiye IBAN'ı <code>TR</code> ile başlar ve toplam <strong>26 karakterdir</strong>: TR, 2 haneli kontrol numarası, 5 haneli banka kodu, 1 haneli rezerv alanı ve 16 haneli hesap numarası.</p></div>
+        </details>
+        <details>
+          <summary>IBAN'dan hesap sahibinin adı öğrenilebilir mi?</summary>
+          <div class="detay-icerik"><p>Hayır. IBAN yalnızca banka kodunu ve hesap numarasını içerir; hesap sahibinin adı IBAN'ın içinde yer almaz.</p></div>
+        </details>
+        <details>
+          <summary>Geçerli çıkan bir IBAN'a güvenle para gönderebilir miyim?</summary>
+          <div class="detay-icerik"><p>Geçerli sonucu yalnızca IBAN'ın doğru yazıldığını gösterir. Hesabın gerçekten var olduğunu veya kime ait olduğunu göstermez. Para göndermeden önce alıcıyı mutlaka başka bir yoldan doğrulayın.</p></div>
+        </details>
+        <details>
+          <summary>IBAN'dan hangi bankaya ait olduğu nasıl anlaşılır?</summary>
+          <div class="detay-icerik"><p>IBAN'ın 5. ile 9. haneleri arasındaki 5 haneli sayı <strong>banka kodudur</strong>. Bu kod, TCMB'nin ödeme sistemleri katılımcı listesindeki banka koduna karşılık gelir. Sitedeki banka listesi TCMB'nin 2026 listesine dayanır.</p></div>
+        </details>
+        <details>
+          <summary>IBAN'dan şube kodu öğrenilebilir mi?</summary>
+          <div class="detay-icerik"><p>Türkiye IBAN'ında şube kodu için standart bir alan yoktur. Hesap numarasının yapısı bankadan bankaya değişir, bu yüzden şube kodu güvenilir şekilde çıkarılamaz.</p></div>
+        </details>
+        <details>
+          <summary>Girdiğim IBAN kaydediliyor mu?</summary>
+          <div class="detay-icerik"><p>Hayır. Kontrol tamamen tarayıcınızda yapılır; IBAN hiçbir sunucuya gönderilmez ve kaydedilmez.</p></div>
+        </details>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -329,48 +401,78 @@
 
   <script>
     // Türkiye banka kodları (IBAN'ın 5.–9. haneleri)
+    // Kaynak: TCMB Ödeme Sistemleri Katılımcıları (2026) listesi, 18.09.2026 güncellemesi
     const BANKALAR = {
-      "00001": "Türkiye Cumhuriyet Merkez Bankası",
-      "00010": "T.C. Ziraat Bankası",
-      "00012": "Türkiye Halk Bankası",
-      "00015": "Türkiye Vakıflar Bankası",
+      "00001": "T.C. Merkez Bankası",
+      "00004": "İller Bankası",
+      "00010": "Ziraat Bankası",
+      "00012": "Halkbank",
+      "00014": "Türkiye Sınai Kalkınma Bankası (TSKB)",
+      "00015": "VakıfBank",
+      "00016": "Türk Eximbank",
       "00017": "Türkiye Kalkınma ve Yatırım Bankası",
       "00029": "Birleşik Fon Bankası",
-      "00032": "Türk Ekonomi Bankası (TEB)",
+      "00032": "TEB (Türk Ekonomi Bankası)",
       "00046": "Akbank",
       "00059": "Şekerbank",
-      "00062": "Türkiye Garanti Bankası",
+      "00060": "Türk Ticaret Bankası",
+      "00062": "Garanti BBVA",
       "00064": "Türkiye İş Bankası",
-      "00067": "Yapı ve Kredi Bankası",
-      "00091": "Arap Türk Bankası (A&T Bank)",
+      "00067": "Yapı Kredi",
+      "00091": "Arap Türk Bankası",
       "00092": "Citibank",
-      "00096": "Turkish Bank",
+      "00096": "Freedom Bank",
+      "00098": "JPMorgan Chase Bank",
       "00099": "ING Bank",
       "00103": "Fibabanka",
+      "00108": "Turkland Bank",
       "00109": "ICBC Turkey Bank",
-      "00111": "QNB Bank (Finansbank)",
+      "00111": "QNB Finansbank",
       "00115": "Deutsche Bank",
+      "00116": "Pasha Yatırım Bank",
+      "00121": "Standard Chartered Yatırım Bankası",
+      "00122": "Société Générale",
       "00123": "HSBC Bank",
       "00124": "Alternatifbank",
       "00125": "Burgan Bank",
-      "00132": "İstanbul Takas ve Saklama Bankası (Takasbank)",
+      "00129": "Bank of America Yatırım Bank",
+      "00132": "Takasbank (İstanbul Takas ve Saklama Bankası)",
       "00134": "DenizBank",
       "00135": "Anadolubank",
-      "00137": "Rabobank",
+      "00137": "Hepsi Bank",
       "00138": "Diler Yatırım Bankası",
       "00139": "GSD Yatırım Bankası",
       "00141": "Nurol Yatırım Bankası",
-      "00142": "BankPozitif Kredi ve Kalkınma Bankası",
-      "00143": "Aktif Yatırım Bankası",
-      "00146": "Odea Bank",
+      "00142": "BankPozitif",
+      "00143": "Aktif Bank",
+      "00146": "Odeabank",
       "00147": "MUFG Bank Turkey",
+      "00148": "Intesa Sanpaolo",
+      "00149": "Bank of China Turkey",
+      "00151": "D Yatırım Bankası",
+      "00152": "Destek Yatırım Bankası",
+      "00153": "Misyon Yatırım Bankası",
+      "00154": "Tera Yatırım Bankası",
+      "00155": "Q Yatırım Bankası",
+      "00156": "Hedef Yatırım Bankası",
       "00157": "Enpara Bank",
+      "00158": "Colendi Bank",
+      "00159": "Fups Bank",
+      "00160": "Ziraat Dinamik Banka",
+      "00161": "Aytemiz Yatırım Bankası",
       "00203": "Albaraka Türk Katılım Bankası",
       "00205": "Kuveyt Türk Katılım Bankası",
       "00206": "Türkiye Finans Katılım Bankası",
       "00209": "Ziraat Katılım Bankası",
       "00210": "Vakıf Katılım Bankası",
-      "00211": "Türkiye Emlak Katılım Bankası"
+      "00211": "Emlak Katılım Bankası",
+      "00212": "Hayat Finans Katılım Bankası",
+      "00213": "T.O.M. Katılım Bankası",
+      "00214": "Dünya Katılım Bankası",
+      "00215": "Adil Katılım Bankası",
+      "00216": "İktisat Katılım Bankası",
+      "00806": "Merkezi Kayıt Kuruluşu (MKK)",
+      "00807": "PTT"
     };
 
     function temizle(deger) {
@@ -559,10 +661,41 @@
 
     const girdi = document.getElementById("iban");
 
-    // Yazarken 4'erli gruplara ayır
-    girdi.addEventListener("input", () => {
-      const temiz = temizle(girdi.value);
+    // Girilen metni sadeleştir: harf/rakam dışını at, rakamla başlıyorsa başına TR ekle
+    function normallestir(metin) {
+      let v = metin.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (/^\d/.test(v)) v = "TR" + v;
+      return v;
+    }
+
+    // Yapıştırılan metnin içinden IBAN'ı bul ("IBAN: TR33 ..." gibi)
+    function metindenIbanBul(metin) {
+      const eslesme = metin.toUpperCase().match(/TR(?:[\s\-.]*\d){24}/);
+      return eslesme ? eslesme[0].replace(/[^A-Z0-9]/g, "") : normallestir(metin);
+    }
+
+    let sonKontrolEdilen = "";
+    function girdiDegisti(temiz) {
       girdi.value = grupla(temiz);
+      if (temiz.length === 26) {
+        // 26 karaktere ulaşınca düğmeye basmadan kontrol et
+        if (temiz !== sonKontrolEdilen) {
+          sonKontrolEdilen = temiz;
+          goster(kontrolEt(temiz));
+        }
+      } else {
+        sonKontrolEdilen = "";
+        document.getElementById("sonuc").style.display = "none";
+      }
+    }
+
+    girdi.addEventListener("input", () => girdiDegisti(normallestir(girdi.value)));
+
+    girdi.addEventListener("paste", e => {
+      const metin = (e.clipboardData || window.clipboardData).getData("text");
+      if (!metin) return;
+      e.preventDefault();
+      girdiDegisti(metindenIbanBul(metin));
     });
 
     document.getElementById("iban-formu").addEventListener("submit", e => {
