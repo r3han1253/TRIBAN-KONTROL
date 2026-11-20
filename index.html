@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Güvenlik: yalnızca bu sitenin dosyaları ve Cloudflare sayacı çalışabilir -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>IBAN Doğrula – IBAN Geçerli mi, Hangi Bankanın?</title>
-  <meta name="description" content="Türkiye IBAN numarasının geçerli olup olmadığını mod 97 ile anında kontrol edin ve hangi bankaya ait olduğunu öğrenin. Ücretsiz; IBAN hiçbir yere gönderilmez.">
+  <meta name="description" content="Türkiye IBAN numarasının geçerli olup olmadığını mod 97 ile anında kontrol edin ve hangi bankaya ait olduğunu öğrenin. Toplu IBAN doğrulama ve Excel (CSV) çıktısı. Ücretsiz; IBAN hiçbir yere gönderilmez.">
   <link rel="canonical" href="https://r3han1253.github.io/TRIBAN-KONTROL/">
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
@@ -43,259 +46,8 @@
     ]
   }
   </script>
-  <script>
-    // Kayıtlı tema tercihini sayfa çizilmeden uygula
-    try {
-      const t = localStorage.getItem("tema");
-      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
-    } catch (e) {}
-  </script>
-  <style>
-    :root {
-      --bg: #f7f7f5;
-      --text: #222;
-      --muted: #666;
-      --accent: #2563eb;
-      --card: #fff;
-      --border: #d4d4d4;
-      --ok: #15803d;
-      --ok-bg: #dcfce7;
-      --err: #b91c1c;
-      --err-bg: #fee2e2;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #16171a;
-        --text: #eee;
-        --muted: #aaa;
-        --accent: #60a5fa;
-        --card: #222428;
-        --border: #3a3d42;
-        --ok: #4ade80;
-        --ok-bg: #12301d;
-        --err: #f87171;
-        --err-bg: #3a1616;
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg: #16171a;
-      --text: #eee;
-      --muted: #aaa;
-      --accent: #60a5fa;
-      --card: #222428;
-      --border: #3a3d42;
-      --ok: #4ade80;
-      --ok-bg: #12301d;
-      --err: #f87171;
-      --err-bg: #3a1616;
-    }
-    @media (max-width: 600px) {
-      header, main { padding-left: 1rem; padding-right: 1rem; }
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      max-width: 760px;
-      margin: 0 auto;
-    }
-    header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
-    header a:hover { color: var(--accent); }
-    .logo { margin-left: 0; display: inline-flex; }
-    .logo img { display: block; width: 44px; height: 44px; transition: opacity 0.2s; }
-    .logo:hover img { opacity: 0.85; }
-    .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
-    .sol a { margin-left: 0; }
-    .tema-anahtari {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-    }
-    .tema-anahtari input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-    .kaydirici {
-      width: 40px;
-      height: 22px;
-      border-radius: 11px;
-      background: var(--border);
-      position: relative;
-      transition: background 0.2s;
-      flex: none;
-    }
-    .kaydirici::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform 0.2s;
-    }
-    .tema-anahtari input:checked + .kaydirici { background: var(--accent); }
-    .tema-anahtari input:checked + .kaydirici::after { transform: translateX(18px); }
-    .tema-anahtari input:focus-visible + .kaydirici { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    details {
-      background: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    summary {
-      cursor: pointer;
-      padding: 1rem 1.25rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-      list-style: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    summary::-webkit-details-marker { display: none; }
-    summary::after { content: "▾"; color: var(--muted); transition: transform 0.2s; }
-    details[open] summary::after { transform: rotate(180deg); }
-    .detay-icerik { padding: 0 1.25rem 1.25rem; }
-    .sss-liste { display: grid; gap: 0.6rem; }
-    .sss-liste summary { font-size: 1rem; }
-
-    .kopyala { display: none; margin-top: 1.25rem; }
-    .kopyala h3 { font-size: 1rem; margin-bottom: 0.5rem; }
-    .kopya-satir {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .kopya-satir .etiket { color: var(--muted); font-size: 0.85rem; width: 100%; }
-    .kopya-satir input {
-      flex: 1 1 240px;
-      min-width: 0;
-      padding: 0.6rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: 0.95rem ui-monospace, Consolas, monospace;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .btn-kopya {
-      padding: 0.6rem 1rem;
-      border: 1px solid var(--accent);
-      background: transparent;
-      color: var(--accent);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      min-width: 110px;
-    }
-    .btn-kopya:hover { background: var(--accent); color: #fff; }
-    .btn-kopya.tamam { background: var(--ok); border-color: var(--ok); color: #fff; }
-    main { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
-    .hero { padding: 3rem 0 1.5rem; text-align: center; }
-    .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
-    .hero p { color: var(--muted); font-size: 1.05rem; }
-
-    .tool {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .tool label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
-    .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    #iban {
-      flex: 1 1 280px;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: 1.05rem ui-monospace, Consolas, monospace;
-      letter-spacing: 0.04em;
-      background: var(--bg);
-      color: var(--text);
-      text-transform: uppercase;
-    }
-    #iban:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-    .btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.4rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .btn:hover { opacity: 0.9; }
-    .hint { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
-
-    #sonuc { margin-top: 1.25rem; display: none; }
-    .durum {
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-    .durum.gecerli { background: var(--ok-bg); color: var(--ok); }
-    .durum.gecersiz { background: var(--err-bg); color: var(--err); }
-    .durum ul { font-weight: 400; margin: 0.4rem 0 0 1.2rem; }
-    .banka-kart {
-      display: none;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .banka-kart { flex-wrap: wrap; }
-    .banka-kart img {
-      height: 64px;
-      width: auto;
-      max-width: 260px;
-      object-fit: contain;
-      background: #fff;
-      border-radius: 10px;
-      padding: 6px;
-      border: 1px solid var(--border);
-    }
-    .rozet {
-      width: 64px;
-      height: 64px;
-      flex: none;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      font-size: 1.3rem;
-    }
-    .banka-ad { font-size: 1.15rem; font-weight: 600; }
-    table { width: 100%; border-collapse: collapse; }
-    td { padding: 0.5rem 0; border-bottom: 1px solid var(--border); vertical-align: top; }
-    td:first-child { color: var(--muted); width: 40%; padding-right: 1rem; }
-    td.mono { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
-
-    section { padding: 2.5rem 0 1rem; }
-    h2 { margin-bottom: 0.75rem; font-size: 1.3rem; }
-    section p, section li { color: var(--muted); }
-    section ol { margin-left: 1.3rem; }
-    code { font-family: ui-monospace, Consolas, monospace; }
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-  </style>
+  <script src="tema.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -313,10 +65,16 @@
   <main>
     <div class="hero">
       <h1>IBAN Doğrula</h1>
-      <p>Türkiye IBAN numaranızın geçerli olup olmadığını ve hangi bankaya ait olduğunu öğrenin.</p>
+      <p>Türkiye IBAN numaralarının geçerli olup olmadığını ve hangi bankaya ait olduğunu tek tek ya da toplu olarak öğrenin.</p>
+    </div>
+
+    <div class="sekmeler" role="tablist" aria-label="Doğrulama türü">
+      <button type="button" role="tab" id="sekme-tekli" class="sekme aktif" aria-controls="panel-tekli" aria-selected="true">IBAN Doğrulama</button>
+      <button type="button" role="tab" id="sekme-toplu" class="sekme" aria-controls="panel-toplu" aria-selected="false" tabindex="-1">Toplu IBAN Doğrulama</button>
     </div>
 
     <div class="tool">
+      <div id="panel-tekli" role="tabpanel" aria-labelledby="sekme-tekli">
       <form id="iban-formu" autocomplete="off">
         <label for="iban">IBAN numarası</label>
         <div class="row">
@@ -344,6 +102,35 @@
             <input id="kopya-bosluksuz" type="text" readonly>
             <button type="button" class="btn-kopya" data-hedef="kopya-bosluksuz">Kopyala</button>
           </div>
+          <h3 class="paylas-baslik">Paylaş</h3>
+          <div class="paylas-satir">
+            <a id="paylas-wa" class="btn-kopya" href="#" target="_blank" rel="noopener noreferrer">WhatsApp'ta paylaş</a>
+            <button type="button" id="paylas-cihaz" class="btn-kopya" hidden>Diğer uygulamalar…</button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <div id="panel-toplu" role="tabpanel" aria-labelledby="sekme-toplu" hidden>
+        <label for="toplu-girdi">IBAN listesi</label>
+        <textarea id="toplu-girdi" rows="8" spellcheck="false" autocomplete="off"
+                  placeholder="Her satıra bir IBAN yazın ya da Excel'den bir sütunu yapıştırın&#10;TR33 0006 1005 1978 6457 8413 26&#10;TR90 0015 7000 0000 0200 0020 22"></textarea>
+        <div class="toplu-eylemler">
+          <button type="button" class="btn" id="toplu-kontrol">Kontrol Et</button>
+          <button type="button" class="btn-ikincil" id="toplu-temizle">Temizle</button>
+          <label class="secenek"><input type="checkbox" id="hatalilar-ustte"> Hatalıları üstte göster</label>
+        </div>
+        <p class="hint">Her satıra bir IBAN gelecek şekilde yapıştırın; satırdaki ad, tutar gibi diğer yazılar yok sayılır. Kontrol tamamen tarayıcınızda yapılır, liste hiçbir yere gönderilmez.</p>
+
+        <div id="toplu-sonuc" hidden aria-live="polite">
+          <p id="toplu-ozet" class="toplu-ozet"></p>
+          <div class="tablo-kap">
+            <table class="toplu-tablo">
+              <thead><tr><th>#</th><th>IBAN</th><th>Durum</th><th>Banka</th><th>Açıklama</th></tr></thead>
+              <tbody id="toplu-govde"></tbody>
+            </table>
+          </div>
+          <button type="button" class="btn-ikincil" id="csv-indir">CSV olarak indir (Excel)</button>
         </div>
       </div>
     </div>
@@ -353,13 +140,13 @@
       <summary>Nasıl çalışır?</summary>
       <div class="detay-icerik">
       <p>Türkiye IBAN'ı 26 karakterdir: <code>TR</code> + 2 haneli kontrol numarası + 5 haneli banka kodu + 1 haneli rezerv alanı (0) + 16 haneli hesap numarası.</p>
-      <p style="margin-top:0.5rem">Doğrulama, ISO 13616 standardındaki <strong>mod 97</strong> yöntemiyle yapılır:</p>
+      <p class="ust-bosluk">Doğrulama, ISO 13616 standardındaki <strong>mod 97</strong> yöntemiyle yapılır:</p>
       <ol>
         <li>İlk 4 karakter (ülke kodu ve kontrol numarası) sona taşınır.</li>
         <li>Harfler sayıya çevrilir (A=10, B=11 … T=29, R=27).</li>
         <li>Oluşan büyük sayının 97'ye bölümünden kalan <strong>1</strong> ise IBAN geçerlidir.</li>
       </ol>
-      <p style="margin-top:0.5rem">Not: Geçerli bir IBAN yalnızca numaranın doğru yazıldığını gösterir; hesabın gerçekten var olduğunu veya kime ait olduğunu göstermez.</p>
+      <p class="ust-bosluk">Not: Geçerli bir IBAN yalnızca numaranın doğru yazıldığını gösterir; hesabın gerçekten var olduğunu veya kime ait olduğunu göstermez.</p>
       </div>
       </details>
     </section>
@@ -399,312 +186,7 @@
     &copy; <span id="yil"></span> IBAN Doğrula
   </footer>
 
-  <script>
-    // Türkiye banka kodları (IBAN'ın 5.–9. haneleri)
-    // Kaynak: TCMB Ödeme Sistemleri Katılımcıları (2026) listesi, 18.09.2026 güncellemesi
-    const BANKALAR = {
-      "00001": "T.C. Merkez Bankası",
-      "00004": "İller Bankası",
-      "00010": "Ziraat Bankası",
-      "00012": "Halkbank",
-      "00014": "Türkiye Sınai Kalkınma Bankası (TSKB)",
-      "00015": "VakıfBank",
-      "00016": "Türk Eximbank",
-      "00017": "Türkiye Kalkınma ve Yatırım Bankası",
-      "00029": "Birleşik Fon Bankası",
-      "00032": "TEB (Türk Ekonomi Bankası)",
-      "00046": "Akbank",
-      "00059": "Şekerbank",
-      "00060": "Türk Ticaret Bankası",
-      "00062": "Garanti BBVA",
-      "00064": "Türkiye İş Bankası",
-      "00067": "Yapı Kredi",
-      "00091": "Arap Türk Bankası",
-      "00092": "Citibank",
-      "00096": "Freedom Bank",
-      "00098": "JPMorgan Chase Bank",
-      "00099": "ING Bank",
-      "00103": "Fibabanka",
-      "00108": "Turkland Bank",
-      "00109": "ICBC Turkey Bank",
-      "00111": "QNB Finansbank",
-      "00115": "Deutsche Bank",
-      "00116": "Pasha Yatırım Bank",
-      "00121": "Standard Chartered Yatırım Bankası",
-      "00122": "Société Générale",
-      "00123": "HSBC Bank",
-      "00124": "Alternatifbank",
-      "00125": "Burgan Bank",
-      "00129": "Bank of America Yatırım Bank",
-      "00132": "Takasbank (İstanbul Takas ve Saklama Bankası)",
-      "00134": "DenizBank",
-      "00135": "Anadolubank",
-      "00137": "Hepsi Bank",
-      "00138": "Diler Yatırım Bankası",
-      "00139": "GSD Yatırım Bankası",
-      "00141": "Nurol Yatırım Bankası",
-      "00142": "BankPozitif",
-      "00143": "Aktif Bank",
-      "00146": "Odeabank",
-      "00147": "MUFG Bank Turkey",
-      "00148": "Intesa Sanpaolo",
-      "00149": "Bank of China Turkey",
-      "00151": "D Yatırım Bankası",
-      "00152": "Destek Yatırım Bankası",
-      "00153": "Misyon Yatırım Bankası",
-      "00154": "Tera Yatırım Bankası",
-      "00155": "Q Yatırım Bankası",
-      "00156": "Hedef Yatırım Bankası",
-      "00157": "Enpara Bank",
-      "00158": "Colendi Bank",
-      "00159": "Fups Bank",
-      "00160": "Ziraat Dinamik Banka",
-      "00161": "Aytemiz Yatırım Bankası",
-      "00203": "Albaraka Türk Katılım Bankası",
-      "00205": "Kuveyt Türk Katılım Bankası",
-      "00206": "Türkiye Finans Katılım Bankası",
-      "00209": "Ziraat Katılım Bankası",
-      "00210": "Vakıf Katılım Bankası",
-      "00211": "Emlak Katılım Bankası",
-      "00212": "Hayat Finans Katılım Bankası",
-      "00213": "T.O.M. Katılım Bankası",
-      "00214": "Dünya Katılım Bankası",
-      "00215": "Adil Katılım Bankası",
-      "00216": "İktisat Katılım Bankası",
-      "00806": "Merkezi Kayıt Kuruluşu (MKK)",
-      "00807": "PTT"
-    };
-
-    function temizle(deger) {
-      return deger.replace(/[\s-]/g, "").toUpperCase();
-    }
-
-    function grupla(iban) {
-      return iban.replace(/(.{4})/g, "$1 ").trim();
-    }
-
-    // ISO 13616 mod 97: büyük sayıyı parça parça işleyerek kalanı hesaplar
-    function mod97(iban) {
-      const duzenli = iban.slice(4) + iban.slice(0, 4);
-      let sayisal = "";
-      for (const ch of duzenli) {
-        sayisal += /[A-Z]/.test(ch) ? (ch.charCodeAt(0) - 55).toString() : ch;
-      }
-      let kalan = 0;
-      for (let i = 0; i < sayisal.length; i += 7) {
-        kalan = Number(String(kalan) + sayisal.slice(i, i + 7)) % 97;
-      }
-      return kalan;
-    }
-
-    function kontrolEt(girdi) {
-      const iban = temizle(girdi);
-      const hatalar = [];
-
-      if (!iban.startsWith("TR")) hatalar.push("IBAN \"TR\" ile başlamalıdır.");
-      if (!/^[A-Z]{2}\d+$/.test(iban)) hatalar.push("Ülke kodundan sonra yalnızca rakam olmalıdır.");
-      if (iban.length !== 26) hatalar.push("Türkiye IBAN'ı 26 karakter olmalıdır (girilen: " + iban.length + ").");
-
-      const yapiDogru = hatalar.length === 0;
-      let kalan = null;
-      if (yapiDogru) {
-        kalan = mod97(iban);
-        if (kalan !== 1) hatalar.push("Mod 97 kontrolü başarısız (kalan " + kalan + ", olması gereken 1). Numarada yazım hatası olabilir.");
-      }
-
-      const bankaKodu = iban.slice(4, 9);
-      return {
-        iban,
-        gecerli: hatalar.length === 0,
-        hatalar,
-        yapiDogru,
-        kalan,
-        kontrolHanesi: iban.slice(2, 4),
-        bankaKodu,
-        banka: BANKALAR[bankaKodu] || null,
-        rezerv: iban.slice(9, 10),
-        hesapNo: iban.slice(10)
-      };
-    }
-
-    function basHarfler(ad) {
-      const atla = ["T.C.", "Türkiye", "Bankası", "Bank", "Katılım", "Yatırım", "ve"];
-      const kelimeler = ad.replace(/\(.*?\)/g, "").split(/\s+/).filter(k => k && !atla.includes(k));
-      return (kelimeler.slice(0, 2).map(k => k[0]).join("") || "?").toUpperCase();
-    }
-
-    // Logo: logolar/<banka kodu>.png varsa gösterilir, yoksa baş harf rozeti kalır
-    function bankaKartiGoster(s) {
-      const kart = document.getElementById("banka-kart");
-      kart.innerHTML = "";
-      if (!s.yapiDogru) { kart.style.display = "none"; return; }
-
-      const ad = s.banka || "Bilinmeyen banka";
-      const rozet = document.createElement("div");
-      rozet.className = "rozet";
-      rozet.textContent = s.banka ? basHarfler(ad) : "?";
-
-      const yazi = document.createElement("div");
-      yazi.className = "banka-ad";
-      yazi.textContent = ad;
-
-      kart.append(rozet, yazi);
-      kart.style.display = "flex";
-
-      if (s.banka) {
-        const img = new Image();
-        img.alt = ad + " logosu";
-        img.onload = () => rozet.replaceWith(img);
-        img.src = "logolar/" + s.bankaKodu + ".png";
-      }
-    }
-
-    function goster(s) {
-      const durum = document.getElementById("durum");
-      const detay = document.getElementById("detay");
-
-      durum.className = "durum " + (s.gecerli ? "gecerli" : "gecersiz");
-      durum.innerHTML = "";
-      durum.append(s.gecerli ? "✓ IBAN geçerli" : "✗ IBAN geçersiz");
-      if (s.hatalar.length) {
-        const ul = document.createElement("ul");
-        s.hatalar.forEach(h => {
-          const li = document.createElement("li");
-          li.textContent = h;
-          ul.append(li);
-        });
-        durum.append(ul);
-      }
-
-      bankaKartiGoster(s);
-
-      const satirlar = [["IBAN", grupla(s.iban), true]];
-      if (s.yapiDogru) {
-        satirlar.push(
-          ["Banka", s.banka || "Bilinmeyen banka kodu", false],
-          ["Banka kodu", s.bankaKodu, true],
-          ["Hesap numarası", s.hesapNo, true]
-        );
-        if (!s.gecerli) {
-          satirlar.push(["Mod 97 kalanı", String(s.kalan), true]);
-        }
-        if (s.rezerv !== "0") {
-          satirlar.push(["Uyarı", "Rezerv hanesi normalde 0 olmalıdır (girilen: " + s.rezerv + ").", false]);
-        }
-      }
-
-      detay.innerHTML = "";
-      satirlar.forEach(([ad, deger, mono]) => {
-        const tr = document.createElement("tr");
-        const td1 = document.createElement("td");
-        const td2 = document.createElement("td");
-        td1.textContent = ad;
-        td2.textContent = deger;
-        if (mono) td2.className = "mono";
-        tr.append(td1, td2);
-        detay.append(tr);
-      });
-
-      // Kopyalama alanı yalnızca geçerli IBAN'da görünür
-      const kopyala = document.getElementById("kopyala");
-      if (s.gecerli) {
-        document.getElementById("kopya-bosluklu").value = grupla(s.iban);
-        document.getElementById("kopya-bosluksuz").value = s.iban;
-        kopyala.style.display = "block";
-      } else {
-        kopyala.style.display = "none";
-      }
-
-      document.getElementById("sonuc").style.display = "block";
-    }
-
-    async function panoyaKopyala(metin, kutu) {
-      try {
-        await navigator.clipboard.writeText(metin);
-        return true;
-      } catch (e) {
-        // Eski tarayıcılar veya izin yoksa: kutuyu seçip kopyala
-        kutu.focus();
-        kutu.select();
-        try { return document.execCommand("copy"); } catch (e2) { return false; }
-      }
-    }
-
-    document.querySelectorAll(".btn-kopya").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const kutu = document.getElementById(btn.dataset.hedef);
-        const basarili = await panoyaKopyala(kutu.value, kutu);
-        btn.textContent = basarili ? "✓ Kopyalandı" : "Kopyalanamadı";
-        btn.classList.toggle("tamam", basarili);
-        setTimeout(() => {
-          btn.textContent = "Kopyala";
-          btn.classList.remove("tamam");
-        }, 1800);
-      });
-    });
-
-    // Üstteki "Nasıl çalışır?" bağlantısı açıklamayı açıp oraya kaydırır
-    document.querySelector('header a[href="#nasil"]').addEventListener("click", () => {
-      document.getElementById("nasil-detay").open = true;
-    });
-
-    // Karanlık mod anahtarı
-    const temaKutusu = document.getElementById("tema");
-    const sistemKaranlik = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const mevcutTema = document.documentElement.dataset.theme;
-    temaKutusu.checked = mevcutTema ? mevcutTema === "dark" : sistemKaranlik;
-    temaKutusu.addEventListener("change", () => {
-      const yeni = temaKutusu.checked ? "dark" : "light";
-      document.documentElement.dataset.theme = yeni;
-      try { localStorage.setItem("tema", yeni); } catch (e) {}
-    });
-
-    const girdi = document.getElementById("iban");
-
-    // Girilen metni sadeleştir: harf/rakam dışını at, rakamla başlıyorsa başına TR ekle
-    function normallestir(metin) {
-      let v = metin.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (/^\d/.test(v)) v = "TR" + v;
-      return v;
-    }
-
-    // Yapıştırılan metnin içinden IBAN'ı bul ("IBAN: TR33 ..." gibi)
-    function metindenIbanBul(metin) {
-      const eslesme = metin.toUpperCase().match(/TR(?:[\s\-.]*\d){24}/);
-      return eslesme ? eslesme[0].replace(/[^A-Z0-9]/g, "") : normallestir(metin);
-    }
-
-    let sonKontrolEdilen = "";
-    function girdiDegisti(temiz) {
-      girdi.value = grupla(temiz);
-      if (temiz.length === 26) {
-        // 26 karaktere ulaşınca düğmeye basmadan kontrol et
-        if (temiz !== sonKontrolEdilen) {
-          sonKontrolEdilen = temiz;
-          goster(kontrolEt(temiz));
-        }
-      } else {
-        sonKontrolEdilen = "";
-        document.getElementById("sonuc").style.display = "none";
-      }
-    }
-
-    girdi.addEventListener("input", () => girdiDegisti(normallestir(girdi.value)));
-
-    girdi.addEventListener("paste", e => {
-      const metin = (e.clipboardData || window.clipboardData).getData("text");
-      if (!metin) return;
-      e.preventDefault();
-      girdiDegisti(metindenIbanBul(metin));
-    });
-
-    document.getElementById("iban-formu").addEventListener("submit", e => {
-      e.preventDefault();
-      goster(kontrolEt(girdi.value));
-    });
-
-    document.getElementById("yil").textContent = new Date().getFullYear();
-  </script>
+  <script src="app.js"></script>
   <!-- Cloudflare Web Analytics: çerezsiz ziyaretçi sayacı (yalnızca sayfa görüntüleme bilgisi gönderir, IBAN göndermez) -->
   <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cf7c5ec5392f4ba684692a2b5b3f1f00"}'></script>
 </body>
