@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IBAN Kontrol</title>
+  <title>IBAN Kontrolü</title>
   <style>
     :root {
       --bg: #f7f7f5;
@@ -111,6 +111,34 @@
     .durum.gecerli { background: var(--ok-bg); color: var(--ok); }
     .durum.gecersiz { background: var(--err-bg); color: var(--err); }
     .durum ul { font-weight: 400; margin: 0.4rem 0 0 1.2rem; }
+    .banka-kart {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .banka-kart img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 10px;
+      padding: 6px;
+      border: 1px solid var(--border);
+    }
+    .rozet {
+      width: 64px;
+      height: 64px;
+      flex: none;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+    .banka-ad { font-size: 1.15rem; font-weight: 600; }
     table { width: 100%; border-collapse: collapse; }
     td { padding: 0.5rem 0; border-bottom: 1px solid var(--border); vertical-align: top; }
     td:first-child { color: var(--muted); width: 40%; padding-right: 1rem; }
@@ -139,7 +167,7 @@
 
   <main>
     <div class="hero">
-      <h1>Rüçhan Çiçeklier</h1>
+      <h1>IBAN Kontrolü</h1>
       <p>Türkiye IBAN numaranızın geçerli olup olmadığını ve hangi bankaya ait olduğunu öğrenin.</p>
     </div>
 
@@ -156,6 +184,7 @@
 
       <div id="sonuc" aria-live="polite">
         <div id="durum" class="durum"></div>
+        <div id="banka-kart" class="banka-kart"></div>
         <table id="detay"></table>
       </div>
     </div>
@@ -174,7 +203,7 @@
   </main>
 
   <footer>
-    &copy; <span id="yil"></span> Rüçhan Çiçeklier
+    &copy; <span id="yil"></span> IBAN Kontrolü
   </footer>
 
   <script>
@@ -274,6 +303,38 @@
       };
     }
 
+    function basHarfler(ad) {
+      const atla = ["T.C.", "Türkiye", "Bankası", "Bank", "Katılım", "Yatırım", "ve"];
+      const kelimeler = ad.replace(/\(.*?\)/g, "").split(/\s+/).filter(k => k && !atla.includes(k));
+      return (kelimeler.slice(0, 2).map(k => k[0]).join("") || "?").toUpperCase();
+    }
+
+    // Logo: logolar/<banka kodu>.png varsa gösterilir, yoksa baş harf rozeti kalır
+    function bankaKartiGoster(s) {
+      const kart = document.getElementById("banka-kart");
+      kart.innerHTML = "";
+      if (!s.yapiDogru) { kart.style.display = "none"; return; }
+
+      const ad = s.banka || "Bilinmeyen banka";
+      const rozet = document.createElement("div");
+      rozet.className = "rozet";
+      rozet.textContent = s.banka ? basHarfler(ad) : "?";
+
+      const yazi = document.createElement("div");
+      yazi.className = "banka-ad";
+      yazi.textContent = ad;
+
+      kart.append(rozet, yazi);
+      kart.style.display = "flex";
+
+      if (s.banka) {
+        const img = new Image();
+        img.alt = ad + " logosu";
+        img.onload = () => rozet.replaceWith(img);
+        img.src = "logolar/" + s.bankaKodu + ".png";
+      }
+    }
+
     function goster(s) {
       const durum = document.getElementById("durum");
       const detay = document.getElementById("detay");
@@ -290,6 +351,8 @@
         });
         durum.append(ul);
       }
+
+      bankaKartiGoster(s);
 
       const satirlar = [["IBAN", grupla(s.iban), true]];
       if (s.yapiDogru) {
