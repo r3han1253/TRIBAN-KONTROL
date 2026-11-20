@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IBAN Kontrolü</title>
+  <script>
+    // Kayıtlı tema tercihini sayfa çizilmeden uygula
+    try {
+      const t = localStorage.getItem("tema");
+      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
   <style>
     :root {
       --bg: #f7f7f5;
@@ -64,6 +71,73 @@
     header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
     header a:hover { color: var(--accent); }
     .logo { font-weight: 700; font-size: 1.1rem; margin-left: 0; }
+    .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .tema-anahtari {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .tema-anahtari input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .kaydirici {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--border);
+      position: relative;
+      transition: background 0.2s;
+      flex: none;
+    }
+    .kaydirici::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s;
+    }
+    .tema-anahtari input:checked + .kaydirici { background: var(--accent); }
+    .tema-anahtari input:checked + .kaydirici::after { transform: translateX(18px); }
+    .tema-anahtari input:focus-visible + .kaydirici { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .kopyala { display: none; margin-top: 1.25rem; }
+    .kopyala h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .kopya-satir {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .kopya-satir .etiket { color: var(--muted); font-size: 0.85rem; width: 100%; }
+    .kopya-satir input {
+      flex: 1 1 240px;
+      min-width: 0;
+      padding: 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: 0.95rem ui-monospace, Consolas, monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .btn-kopya {
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      min-width: 110px;
+    }
+    .btn-kopya:hover { background: var(--accent); color: #fff; }
+    .btn-kopya.tamam { background: var(--ok); border-color: var(--ok); color: #fff; }
     main { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
     .hero { padding: 3rem 0 1.5rem; text-align: center; }
     .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
@@ -161,7 +235,14 @@
 </head>
 <body>
   <header>
-    <a href="#" class="logo">IBAN Kontrol</a>
+    <div class="sol">
+      <label class="tema-anahtari" title="Karanlık modu aç/kapat">
+        <input type="checkbox" id="tema">
+        <span class="kaydirici" aria-hidden="true"></span>
+        <span>🌙 Karanlık mod</span>
+      </label>
+      <a href="#" class="logo">IBAN Kontrolü</a>
+    </div>
     <nav>
       <a href="#nasil">Nasıl çalışır?</a>
     </nav>
@@ -188,6 +269,19 @@
         <div id="durum" class="durum"></div>
         <div id="banka-kart" class="banka-kart"></div>
         <table id="detay"></table>
+        <div id="kopyala" class="kopyala">
+          <h3>IBAN'ı kopyala</h3>
+          <div class="kopya-satir">
+            <span class="etiket">Boşluklu</span>
+            <input id="kopya-bosluklu" type="text" readonly>
+            <button type="button" class="btn-kopya" data-hedef="kopya-bosluklu">Kopyala</button>
+          </div>
+          <div class="kopya-satir">
+            <span class="etiket">Boşluksuz</span>
+            <input id="kopya-bosluksuz" type="text" readonly>
+            <button type="button" class="btn-kopya" data-hedef="kopya-bosluksuz">Kopyala</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -364,10 +458,7 @@
           ["Hesap numarası", s.hesapNo, true]
         );
         if (!s.gecerli) {
-          satirlar.push(
-            ["Kontrol numarası", s.kontrolHanesi, true],
-            ["Mod 97 kalanı", String(s.kalan), true]
-          );
+          satirlar.push(["Mod 97 kalanı", String(s.kalan), true]);
         }
         if (s.rezerv !== "0") {
           satirlar.push(["Uyarı", "Rezerv hanesi normalde 0 olmalıdır (girilen: " + s.rezerv + ").", false]);
@@ -386,8 +477,54 @@
         detay.append(tr);
       });
 
+      // Kopyalama alanı yalnızca geçerli IBAN'da görünür
+      const kopyala = document.getElementById("kopyala");
+      if (s.gecerli) {
+        document.getElementById("kopya-bosluklu").value = grupla(s.iban);
+        document.getElementById("kopya-bosluksuz").value = s.iban;
+        kopyala.style.display = "block";
+      } else {
+        kopyala.style.display = "none";
+      }
+
       document.getElementById("sonuc").style.display = "block";
     }
+
+    async function panoyaKopyala(metin, kutu) {
+      try {
+        await navigator.clipboard.writeText(metin);
+        return true;
+      } catch (e) {
+        // Eski tarayıcılar veya izin yoksa: kutuyu seçip kopyala
+        kutu.focus();
+        kutu.select();
+        try { return document.execCommand("copy"); } catch (e2) { return false; }
+      }
+    }
+
+    document.querySelectorAll(".btn-kopya").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const kutu = document.getElementById(btn.dataset.hedef);
+        const basarili = await panoyaKopyala(kutu.value, kutu);
+        btn.textContent = basarili ? "✓ Kopyalandı" : "Kopyalanamadı";
+        btn.classList.toggle("tamam", basarili);
+        setTimeout(() => {
+          btn.textContent = "Kopyala";
+          btn.classList.remove("tamam");
+        }, 1800);
+      });
+    });
+
+    // Karanlık mod anahtarı
+    const temaKutusu = document.getElementById("tema");
+    const sistemKaranlik = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const mevcutTema = document.documentElement.dataset.theme;
+    temaKutusu.checked = mevcutTema ? mevcutTema === "dark" : sistemKaranlik;
+    temaKutusu.addEventListener("change", () => {
+      const yeni = temaKutusu.checked ? "dark" : "light";
+      document.documentElement.dataset.theme = yeni;
+      try { localStorage.setItem("tema", yeni); } catch (e) {}
+    });
 
     const girdi = document.getElementById("iban");
 
