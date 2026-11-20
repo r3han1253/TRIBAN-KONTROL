@@ -254,7 +254,7 @@ const mevcutTema = document.documentElement.dataset.theme;
 const temaSimge = document.getElementById("tema-simge");
 function temaSimgesiniGuncelle() {
   // Karanlık modda ay, aydınlık modda güneş
-  temaSimge.textContent = temaKutusu.checked ? "🌙" : "☀️";
+  temaSimge.textContent = temaKutusu.checked ? "🌙" : "🌞";
 }
 temaKutusu.checked = mevcutTema ? mevcutTema === "dark" : sistemKaranlik;
 temaSimgesiniGuncelle();

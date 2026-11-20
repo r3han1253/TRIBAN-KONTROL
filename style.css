@@ -422,3 +422,15 @@ footer a:hover { color: var(--accent); }
 }
 .geri { display: inline-block; margin-bottom: 1rem; color: var(--accent); text-decoration: none; }
 .geri:hover { text-decoration: underline; }
+
+/* Tema düğmesi kutu içinde, daha belirgin */
+.tema-simge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-size: 1.4rem;
+}
+.tema-anahtari:hover .tema-simge { background: var(--card); border-color: var(--accent); }
