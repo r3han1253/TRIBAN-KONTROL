@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBAN Kontrol</title>
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --text: #222;
+      --muted: #666;
+      --accent: #2563eb;
+      --card: #fff;
+      --border: #d4d4d4;
+      --ok: #15803d;
+      --ok-bg: #dcfce7;
+      --err: #b91c1c;
+      --err-bg: #fee2e2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #16171a;
+        --text: #eee;
+        --muted: #aaa;
+        --accent: #60a5fa;
+        --card: #222428;
+        --border: #3a3d42;
+        --ok: #4ade80;
+        --ok-bg: #12301d;
+        --err: #f87171;
+        --err-bg: #3a1616;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #16171a;
+      --text: #eee;
+      --muted: #aaa;
+      --accent: #60a5fa;
+      --card: #222428;
+      --border: #3a3d42;
+      --ok: #4ade80;
+      --ok-bg: #12301d;
+      --err: #f87171;
+      --err-bg: #3a1616;
+    }
+    @media (max-width: 600px) {
+      header, main { padding-left: 1rem; padding-right: 1rem; }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
+    header a:hover { color: var(--accent); }
+    .logo { font-weight: 700; font-size: 1.1rem; margin-left: 0; }
+    main { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+    .hero { padding: 3rem 0 1.5rem; text-align: center; }
+    .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .hero p { color: var(--muted); font-size: 1.05rem; }
+
+    .tool {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .tool label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+    .row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    #iban {
+      flex: 1 1 280px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: 1.05rem ui-monospace, Consolas, monospace;
+      letter-spacing: 0.04em;
+      background: var(--bg);
+      color: var(--text);
+      text-transform: uppercase;
+    }
+    #iban:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.4rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: 0.9; }
+    .hint { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+
+    #sonuc { margin-top: 1.25rem; display: none; }
+    .durum {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .durum.gecerli { background: var(--ok-bg); color: var(--ok); }
+    .durum.gecersiz { background: var(--err-bg); color: var(--err); }
+    .durum ul { font-weight: 400; margin: 0.4rem 0 0 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    td { padding: 0.5rem 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+    td:first-child { color: var(--muted); width: 40%; padding-right: 1rem; }
+    td.mono { font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+
+    section { padding: 2.5rem 0 1rem; }
+    h2 { margin-bottom: 0.75rem; font-size: 1.3rem; }
+    section p, section li { color: var(--muted); }
+    section ol { margin-left: 1.3rem; }
+    code { font-family: ui-monospace, Consolas, monospace; }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="#" class="logo">IBAN Kontrol</a>
+    <nav>
+      <a href="#nasil">Nasıl çalışır?</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>Rüçhan Çiçeklier</h1>
+      <p>Türkiye IBAN numaranızın geçerli olup olmadığını ve hangi bankaya ait olduğunu öğrenin.</p>
+    </div>
+
+    <div class="tool">
+      <form id="iban-formu" autocomplete="off">
+        <label for="iban">IBAN numarası</label>
+        <div class="row">
+          <input id="iban" type="text" inputmode="text" maxlength="40"
+                 placeholder="TR00 0000 0000 0000 0000 0000 00" required>
+          <button type="submit" class="btn">Kontrol Et</button>
+        </div>
+        <p class="hint">Kontrol tamamen tarayıcınızda yapılır; IBAN hiçbir yere gönderilmez.</p>
+      </form>
+
+      <div id="sonuc" aria-live="polite">
+        <div id="durum" class="durum"></div>
+        <table id="detay"></table>
+      </div>
+    </div>
+
+    <section id="nasil">
+      <h2>Nasıl çalışır?</h2>
+      <p>Türkiye IBAN'ı 26 karakterdir: <code>TR</code> + 2 haneli kontrol numarası + 5 haneli banka kodu + 1 haneli rezerv alanı (0) + 16 haneli hesap numarası.</p>
+      <p style="margin-top:0.5rem">Doğrulama, ISO 13616 standardındaki <strong>mod 97</strong> yöntemiyle yapılır:</p>
+      <ol>
+        <li>İlk 4 karakter (ülke kodu ve kontrol numarası) sona taşınır.</li>
+        <li>Harfler sayıya çevrilir (A=10, B=11 … T=29, R=27).</li>
+        <li>Oluşan büyük sayının 97'ye bölümünden kalan <strong>1</strong> ise IBAN geçerlidir.</li>
+      </ol>
+      <p style="margin-top:0.5rem">Not: Geçerli bir IBAN yalnızca numaranın doğru yazıldığını gösterir; hesabın gerçekten var olduğunu veya kime ait olduğunu göstermez.</p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; <span id="yil"></span> Rüçhan Çiçeklier
+  </footer>
+
+  <script>
+    // Türkiye banka kodları (IBAN'ın 5.–9. haneleri)
+    const BANKALAR = {
+      "00001": "Türkiye Cumhuriyet Merkez Bankası",
+      "00010": "T.C. Ziraat Bankası",
+      "00012": "Türkiye Halk Bankası",
+      "00015": "Türkiye Vakıflar Bankası",
+      "00017": "Türkiye Kalkınma ve Yatırım Bankası",
+      "00029": "Birleşik Fon Bankası",
+      "00032": "Türk Ekonomi Bankası (TEB)",
+      "00046": "Akbank",
+      "00059": "Şekerbank",
+      "00062": "Türkiye Garanti Bankası",
+      "00064": "Türkiye İş Bankası",
+      "00067": "Yapı ve Kredi Bankası",
+      "00091": "Arap Türk Bankası (A&T Bank)",
+      "00092": "Citibank",
+      "00096": "Turkish Bank",
+      "00099": "ING Bank",
+      "00103": "Fibabanka",
+      "00109": "ICBC Turkey Bank",
+      "00111": "QNB Bank (Finansbank)",
+      "00115": "Deutsche Bank",
+      "00123": "HSBC Bank",
+      "00124": "Alternatifbank",
+      "00125": "Burgan Bank",
+      "00132": "İstanbul Takas ve Saklama Bankası (Takasbank)",
+      "00134": "DenizBank",
+      "00135": "Anadolubank",
+      "00137": "Rabobank",
+      "00138": "Diler Yatırım Bankası",
+      "00139": "GSD Yatırım Bankası",
+      "00141": "Nurol Yatırım Bankası",
+      "00142": "BankPozitif Kredi ve Kalkınma Bankası",
+      "00143": "Aktif Yatırım Bankası",
+      "00146": "Odea Bank",
+      "00147": "MUFG Bank Turkey",
+      "00203": "Albaraka Türk Katılım Bankası",
+      "00205": "Kuveyt Türk Katılım Bankası",
+      "00206": "Türkiye Finans Katılım Bankası",
+      "00209": "Ziraat Katılım Bankası",
+      "00210": "Vakıf Katılım Bankası",
+      "00211": "Türkiye Emlak Katılım Bankası"
+    };
+
+    function temizle(deger) {
+      return deger.replace(/[\s-]/g, "").toUpperCase();
+    }
+
+    function grupla(iban) {
+      return iban.replace(/(.{4})/g, "$1 ").trim();
+    }
+
+    // ISO 13616 mod 97: büyük sayıyı parça parça işleyerek kalanı hesaplar
+    function mod97(iban) {
+      const duzenli = iban.slice(4) + iban.slice(0, 4);
+      let sayisal = "";
+      for (const ch of duzenli) {
+        sayisal += /[A-Z]/.test(ch) ? (ch.charCodeAt(0) - 55).toString() : ch;
+      }
+      let kalan = 0;
+      for (let i = 0; i < sayisal.length; i += 7) {
+        kalan = Number(String(kalan) + sayisal.slice(i, i + 7)) % 97;
+      }
+      return kalan;
+    }
+
+    function kontrolEt(girdi) {
+      const iban = temizle(girdi);
+      const hatalar = [];
+
+      if (!iban.startsWith("TR")) hatalar.push("IBAN \"TR\" ile başlamalıdır.");
+      if (!/^[A-Z]{2}\d+$/.test(iban)) hatalar.push("Ülke kodundan sonra yalnızca rakam olmalıdır.");
+      if (iban.length !== 26) hatalar.push("Türkiye IBAN'ı 26 karakter olmalıdır (girilen: " + iban.length + ").");
+
+      const yapiDogru = hatalar.length === 0;
+      let kalan = null;
+      if (yapiDogru) {
+        kalan = mod97(iban);
+        if (kalan !== 1) hatalar.push("Mod 97 kontrolü başarısız (kalan " + kalan + ", olması gereken 1). Numarada yazım hatası olabilir.");
+      }
+
+      const bankaKodu = iban.slice(4, 9);
+      return {
+        iban,
+        gecerli: hatalar.length === 0,
+        hatalar,
+        yapiDogru,
+        kalan,
+        kontrolHanesi: iban.slice(2, 4),
+        bankaKodu,
+        banka: BANKALAR[bankaKodu] || null,
+        rezerv: iban.slice(9, 10),
+        hesapNo: iban.slice(10)
+      };
+    }
+
+    function goster(s) {
+      const durum = document.getElementById("durum");
+      const detay = document.getElementById("detay");
+
+      durum.className = "durum " + (s.gecerli ? "gecerli" : "gecersiz");
+      durum.innerHTML = "";
+      durum.append(s.gecerli ? "✓ IBAN geçerli" : "✗ IBAN geçersiz");
+      if (s.hatalar.length) {
+        const ul = document.createElement("ul");
+        s.hatalar.forEach(h => {
+          const li = document.createElement("li");
+          li.textContent = h;
+          ul.append(li);
+        });
+        durum.append(ul);
+      }
+
+      const satirlar = [["IBAN", grupla(s.iban), true]];
+      if (s.yapiDogru) {
+        satirlar.push(
+          ["Banka", s.banka || "Bilinmeyen banka kodu", false],
+          ["Banka kodu", s.bankaKodu, true],
+          ["Kontrol numarası", s.kontrolHanesi, true],
+          ["Hesap numarası", s.hesapNo, true],
+          ["Mod 97 kalanı", String(s.kalan), true]
+        );
+        if (s.rezerv !== "0") {
+          satirlar.push(["Uyarı", "Rezerv hanesi normalde 0 olmalıdır (girilen: " + s.rezerv + ").", false]);
+        }
+      }
+
+      detay.innerHTML = "";
+      satirlar.forEach(([ad, deger, mono]) => {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td");
+        const td2 = document.createElement("td");
+        td1.textContent = ad;
+        td2.textContent = deger;
+        if (mono) td2.className = "mono";
+        tr.append(td1, td2);
+        detay.append(tr);
+      });
+
+      document.getElementById("sonuc").style.display = "block";
+    }
+
+    const girdi = document.getElementById("iban");
+
+    // Yazarken 4'erli gruplara ayır
+    girdi.addEventListener("input", () => {
+      const temiz = temizle(girdi.value);
+      girdi.value = grupla(temiz);
+    });
+
+    document.getElementById("iban-formu").addEventListener("submit", e => {
+      e.preventDefault();
+      goster(kontrolEt(girdi.value));
+    });
+
+    document.getElementById("yil").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
