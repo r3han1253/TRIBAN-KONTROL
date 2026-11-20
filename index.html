@@ -71,7 +71,8 @@
     header a { color: var(--text); text-decoration: none; margin-left: 1rem; }
     header a:hover { color: var(--accent); }
     .logo { font-weight: 700; font-size: 1.1rem; margin-left: 0; }
-    .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .sol { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
+    .sol a { margin-left: 0; }
     .tema-anahtari {
       display: inline-flex;
       align-items: center;
@@ -235,16 +236,14 @@
 </head>
 <body>
   <header>
-    <div class="sol">
+    <a href="#" class="logo">IBAN Kontrolü</a>
+    <nav class="sol">
+      <a href="#nasil">Nasıl çalışır?</a>
       <label class="tema-anahtari" title="Karanlık modu aç/kapat">
         <input type="checkbox" id="tema">
         <span class="kaydirici" aria-hidden="true"></span>
         <span>🌙 Karanlık mod</span>
       </label>
-      <a href="#" class="logo">IBAN Kontrolü</a>
-    </div>
-    <nav>
-      <a href="#nasil">Nasıl çalışır?</a>
     </nav>
   </header>
 
