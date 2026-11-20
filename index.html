@@ -361,10 +361,14 @@
         satirlar.push(
           ["Banka", s.banka || "Bilinmeyen banka kodu", false],
           ["Banka kodu", s.bankaKodu, true],
-          ["Kontrol numarası", s.kontrolHanesi, true],
-          ["Hesap numarası", s.hesapNo, true],
-          ["Mod 97 kalanı", String(s.kalan), true]
+          ["Hesap numarası", s.hesapNo, true]
         );
+        if (!s.gecerli) {
+          satirlar.push(
+            ["Kontrol numarası", s.kontrolHanesi, true],
+            ["Mod 97 kalanı", String(s.kalan), true]
+          );
+        }
         if (s.rezerv !== "0") {
           satirlar.push(["Uyarı", "Rezerv hanesi normalde 0 olmalıdır (girilen: " + s.rezerv + ").", false]);
         }
