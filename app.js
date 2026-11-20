@@ -99,15 +99,29 @@ function kontrolEt(girdi) {
   const iban = temizle(girdi);
   const hatalar = [];
 
-  if (!iban.startsWith("TR")) hatalar.push("IBAN \"TR\" ile başlamalıdır.");
-  if (!/^[A-Z]{2}\d+$/.test(iban)) hatalar.push("Ülke kodundan sonra yalnızca rakam olmalıdır.");
-  if (iban.length !== 26) hatalar.push("Türkiye IBAN'ı 26 karakter olmalıdır (girilen: " + iban.length + ").");
+  // Kullanıcıya gösterilen, sade dilli hata açıklamaları
+  if (!iban.startsWith("TR")) {
+    hatalar.push("Bu bir Türkiye IBAN'ı değil. Türkiye'deki tüm IBAN'lar \"TR\" ile başlar.");
+  } else if (!/^TR\d+$/.test(iban)) {
+    hatalar.push("TR'den sonra yalnızca rakam olmalı. Numarada harf ya da özel bir karakter var.");
+  }
+  if (!iban.startsWith("TR")) {
+    // Yabancı IBAN'da uzunluk mesajı yanıltıcı olur, gösterilmez
+  } else if (iban.length < 26) {
+    const eksik = 26 - iban.length;
+    hatalar.push("IBAN eksik: " + iban.length + " karakter girdiniz, Türkiye IBAN'ı 26 karakterdir (" + eksik + " karakter eksik).");
+  } else if (iban.length > 26) {
+    const fazla = iban.length - 26;
+    hatalar.push("IBAN fazla uzun: " + iban.length + " karakter girdiniz, Türkiye IBAN'ı 26 karakterdir (" + fazla + " karakter fazla).");
+  }
 
   const yapiDogru = hatalar.length === 0;
   let kalan = null;
   if (yapiDogru) {
     kalan = mod97(iban);
-    if (kalan !== 1) hatalar.push("Mod 97 kontrolü başarısız (kalan " + kalan + ", olması gereken 1). Numarada yazım hatası olabilir.");
+    if (kalan !== 1) {
+      hatalar.push("Numara hatalı yazılmış. Uzunluk doğru ama rakamlardan biri yanlış ya da iki rakamın yeri karışmış olabilir. IBAN'ı banka uygulamanızdan veya dekonttan tekrar kopyalayıp deneyin.");
+    }
   }
 
   const bankaKodu = iban.slice(4, 9);
@@ -135,7 +149,8 @@ function basHarfler(ad) {
 function bankaKartiGoster(s) {
   const kart = document.getElementById("banka-kart");
   kart.innerHTML = "";
-  if (!s.yapiDogru) { kart.style.display = "none"; return; }
+  // Geçersiz IBAN'da banka bilgisi gösterilmez (yalnızca hata görünür)
+  if (!s.gecerli) { kart.style.display = "none"; return; }
 
   const ad = s.banka || "Bilinmeyen banka";
   const rozet = document.createElement("div");
@@ -163,8 +178,13 @@ function goster(s) {
 
   durum.className = "durum " + (s.gecerli ? "gecerli" : "gecersiz");
   durum.innerHTML = "";
-  durum.append(s.gecerli ? "✓ IBAN geçerli" : "✗ IBAN geçersiz");
-  if (s.hatalar.length) {
+  durum.append(s.gecerli ? "✓ IBAN geçerli" : "✗ Bu IBAN geçersiz");
+  if (s.hatalar.length === 1) {
+    const p = document.createElement("p");
+    p.className = "hata-aciklama";
+    p.textContent = s.hatalar[0];
+    durum.append(p);
+  } else if (s.hatalar.length > 1) {
     const ul = document.createElement("ul");
     s.hatalar.forEach(h => {
       const li = document.createElement("li");
@@ -176,22 +196,22 @@ function goster(s) {
 
   bankaKartiGoster(s);
 
-  const satirlar = [["IBAN", grupla(s.iban), true]];
-  if (s.yapiDogru) {
+  // Ayrıntı tablosu yalnızca geçerli IBAN'da gösterilir; geçersizde önceki bilgiler temizlenir
+  const satirlar = [];
+  if (s.gecerli) {
     satirlar.push(
+      ["IBAN", grupla(s.iban), true],
       ["Banka", s.banka || "Bilinmeyen banka kodu", false],
       ["Banka kodu", s.bankaKodu, true],
       ["Hesap numarası", s.hesapNo, true]
     );
-    if (!s.gecerli) {
-      satirlar.push(["Mod 97 kalanı", String(s.kalan), true]);
-    }
     if (s.rezerv !== "0") {
       satirlar.push(["Uyarı", "Rezerv hanesi normalde 0 olmalıdır (girilen: " + s.rezerv + ").", false]);
     }
   }
 
   detay.innerHTML = "";
+  detay.hidden = satirlar.length === 0;
   satirlar.forEach(([ad, deger, mono]) => {
     const tr = document.createElement("tr");
     const td1 = document.createElement("td");
@@ -301,8 +321,8 @@ function metindenIbanBul(metin) {
 let sonKontrolEdilen = "";
 function girdiDegisti(temiz) {
   girdi.value = grupla(temiz);
-  if (temiz.length === 26) {
-    // 26 karaktere ulaşınca düğmeye basmadan kontrol et
+  if (temiz.length >= 26) {
+    // 26 karaktere ulaşınca düğmeye basmadan kontrol et; fazlası da hata olarak gösterilir
     if (temiz !== sonKontrolEdilen) {
       sonKontrolEdilen = temiz;
       goster(kontrolEt(temiz));
@@ -385,7 +405,7 @@ function kisaAciklama(r) {
   if (!r.iban.startsWith("TR")) return "TR ile başlamıyor";
   if (!/^[A-Z]{2}\d+$/.test(r.iban)) return "Geçersiz karakter var";
   if (r.iban.length !== 26) return r.iban.length + " karakter (26 olmalı)";
-  return "Kontrol haneleri tutmuyor, yazım hatası olabilir";
+  return "Rakamlardan biri yanlış yazılmış olabilir";
 }
 
 function topluKontrolEt(metin) {

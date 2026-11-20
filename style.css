@@ -434,3 +434,5 @@ footer a:hover { color: var(--accent); }
   font-size: 1.4rem;
 }
 .tema-anahtari:hover .tema-simge { background: var(--card); border-color: var(--accent); }
+
+.durum .hata-aciklama { font-weight: 400; margin-top: 0.35rem; }
