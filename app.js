@@ -251,10 +251,17 @@ document.querySelector('header a[href="#nasil"]').addEventListener("click", () =
 const temaKutusu = document.getElementById("tema");
 const sistemKaranlik = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const mevcutTema = document.documentElement.dataset.theme;
+const temaSimge = document.getElementById("tema-simge");
+function temaSimgesiniGuncelle() {
+  // Karanlık modda ay, aydınlık modda güneş
+  temaSimge.textContent = temaKutusu.checked ? "🌙" : "☀️";
+}
 temaKutusu.checked = mevcutTema ? mevcutTema === "dark" : sistemKaranlik;
+temaSimgesiniGuncelle();
 temaKutusu.addEventListener("change", () => {
   const yeni = temaKutusu.checked ? "dark" : "light";
   document.documentElement.dataset.theme = yeni;
+  temaSimgesiniGuncelle();
   try { localStorage.setItem("tema", yeni); } catch (e) {}
 });
 
