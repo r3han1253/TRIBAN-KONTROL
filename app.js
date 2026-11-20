@@ -483,6 +483,25 @@ function topluOzetYaz() {
   }
 }
 
+// Her satırda en fazla 26 IBAN karakteri (harf/rakam) girilebilir; fazlası kesilir
+const topluGirdi = document.getElementById("toplu-girdi");
+function satiriKisalt(satir) {
+  let sayac = 0;
+  for (let i = 0; i < satir.length; i++) {
+    if (/[A-Za-z0-9]/.test(satir[i]) && ++sayac > 26) return satir.slice(0, i).replace(/[\s\-.]+$/, "");
+  }
+  return satir;
+}
+topluGirdi.addEventListener("input", () => {
+  const eski = topluGirdi.value;
+  const yeni = eski.split("\n").map(satiriKisalt).join("\n");
+  if (yeni !== eski) {
+    const imlec = Math.min(topluGirdi.selectionStart, yeni.length);
+    topluGirdi.value = yeni;
+    topluGirdi.setSelectionRange(imlec, imlec);
+  }
+});
+
 document.getElementById("toplu-kontrol").addEventListener("click", () => {
   topluSonuclar = topluKontrolEt(document.getElementById("toplu-girdi").value);
   topluOzetYaz();
